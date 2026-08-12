@@ -33,8 +33,8 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
   const related = relatedProducts(product);
 
   return (
-    <main className="page product-page">
-      <nav className="breadcrumb" aria-label="Migas de pan">
+    <main className="product-detail">
+      <nav className="detail-breadcrumb" aria-label="Migas de pan">
         <Link href="/">Inicio</Link>
         <ChevronRight size={14} />
         <Link href={`/catalogo?cat=${encodeURIComponent(product.category)}`}>{product.category}</Link>
@@ -42,41 +42,45 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
         <span>{product.name}</span>
       </nav>
 
-      <div className="product-detail">
+      <div className="detail-grid">
         <div className="detail-visual">
           {product.badge && <span className="product-badge">{product.badge}</span>}
           <ProductIllustration type={product.visual} />
         </div>
-        <div className="detail-copy">
+        <div className="detail-info">
           <span className="product-category">{product.category}</span>
           <h1>{product.name}</h1>
           <div className="rating">
             <Star size={15} fill="currentColor" /> {product.rating} <span>({product.reviews} opiniones)</span>
           </div>
-          <p className="detail-short">{product.short}</p>
+          <p>{product.short}</p>
           <div className="detail-price">{money.format(product.price)}</div>
 
           <ProductBuy product={product} />
 
-          <h2>Datos que importan</h2>
-          <ul className="spec-list">
-            {product.specs.map((spec) => (
-              <li key={spec}>
-                <BadgeCheck size={16} /> {spec}
-              </li>
-            ))}
-          </ul>
+          <div className="detail-block">
+            <h4>Datos que importan</h4>
+            <ul className="detail-features">
+              {product.specs.map((spec) => (
+                <li key={spec}>
+                  <BadgeCheck size={16} /> {spec}
+                </li>
+              ))}
+            </ul>
+          </div>
 
-          <h2>Compatibilidad declarada</h2>
-          <div className="compat-tags">
-            {product.compatible.map((item) => (
-              <span key={item}>{item}</span>
-            ))}
+          <div className="detail-block">
+            <h4>Compatibilidad declarada</h4>
+            <div className="detail-compat">
+              {product.compatible.map((item) => (
+                <span key={item}>{item}</span>
+              ))}
+            </div>
           </div>
         </div>
       </div>
 
-      <section className="related">
+      <section className="detail-related">
         <div className="section-heading">
           <div>
             <span className="kicker">Suele combinarse con</span>
@@ -86,14 +90,14 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
             Ver catálogo
           </Link>
         </div>
-        <div className="product-grid">
+        <div className="related-grid">
           {related.map((item) => (
             <ProductCard key={item.id} product={item} />
           ))}
         </div>
       </section>
 
-      <Link className="back-link" href="/catalogo">
+      <Link className="text-link" href="/catalogo">
         <ArrowLeft size={16} /> Volver al catálogo
       </Link>
     </main>
