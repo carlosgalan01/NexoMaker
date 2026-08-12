@@ -4,6 +4,7 @@ import {
   ArrowRight,
   BadgeCheck,
   Box,
+  BrickWall,
   ChevronDown,
   ChevronRight,
   CircleHelp,
@@ -211,7 +212,7 @@ export default function Home() {
             const Icon = categoryIcons[item.icon as keyof typeof categoryIcons];
             return (
               <button key={item.name} className="category-card" onClick={() => jumpToCatalog(item.name)}>
-                <span><Icon size={25} /></span>
+                <span>{item.name === "Materiales" ? <BrickWall size={25} /> : <Icon size={25} />}</span>
                 <div><strong>{item.name}</strong><small>{item.note}</small></div>
                 <ChevronRight size={18} />
               </button>
