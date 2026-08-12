@@ -88,7 +88,7 @@ export function SiteHeader() {
           <Link
             key={item.href}
             href={item.href}
-            className={isActive(item.href) ? "nav-active" : ""}
+            className={isActive(item.href) ? "nav-link-active" : ""}
             aria-current={isActive(item.href) ? "page" : undefined}
           >
             {item.label}
