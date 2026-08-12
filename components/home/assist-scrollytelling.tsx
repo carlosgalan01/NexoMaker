@@ -84,14 +84,16 @@ export function AssistScrollytelling() {
             return (
               <div
                 key={step.label}
-                className={active === index ? "scrolly-step is-active" : "scrolly-step"}
+                className={active === index ? "scrolly-step active" : "scrolly-step"}
                 data-index={index}
                 ref={(node) => {
                   stepRefs.current[index] = node;
                 }}
               >
                 <div className="step-marker">
-                  <StepIcon size={18} />
+                  <span className="step-index">
+                    <StepIcon size={18} />
+                  </span>
                 </div>
                 <div>
                   <span className="step-label">{step.label}</span>
@@ -119,17 +121,17 @@ export function AssistScrollytelling() {
               </div>
               <em className="progress-dots">
                 {steps.map((_, index) => (
-                  <b key={index} className={index <= active ? "on" : ""} />
+                  <i key={index} className={index <= active ? "on" : ""} />
                 ))}
               </em>
             </div>
 
             <div className="assist-panel-body">
-              <div className={active >= 0 ? "panel-block user visible" : "panel-block user"}>
+              <div className="reveal-row show">
                 <div className="user-bubble">{scenario.question}</div>
               </div>
 
-              <div className={active >= 1 ? "panel-block visible" : "panel-block"}>
+              <div className={active >= 1 ? "reveal-row show" : "reveal-row"}>
                 <span className="panel-tag">
                   <ListChecks size={14} /> Condiciones detectadas
                 </span>
@@ -140,7 +142,7 @@ export function AssistScrollytelling() {
                 </div>
               </div>
 
-              <div className={active >= 2 ? "panel-block visible" : "panel-block"}>
+              <div className={active >= 2 ? "reveal-row show" : "reveal-row"}>
                 <span className="panel-tag">
                   <FileSearch size={14} /> Comprobando compatibilidad
                 </span>
@@ -152,7 +154,7 @@ export function AssistScrollytelling() {
                 </div>
               </div>
 
-              <div className={active >= 3 ? "panel-block visible" : "panel-block"}>
+              <div className={active >= 3 ? "reveal-row show" : "reveal-row"}>
                 <span className="panel-tag">
                   <Cpu size={14} /> Configuración propuesta
                 </span>
@@ -172,7 +174,7 @@ export function AssistScrollytelling() {
                 </div>
               </div>
 
-              <div className={active >= 4 ? "panel-block visible" : "panel-block"}>
+              <div className={active >= 4 ? "reveal-row show" : "reveal-row"}>
                 <div className="panel-warning">
                   <CircleAlert size={18} />
                   <span>
