@@ -220,3 +220,84 @@ export const money = new Intl.NumberFormat("es-ES", {
   style: "currency",
   currency: "EUR",
 });
+
+export function getProduct(id: number) {
+  return products.find((product) => product.id === id);
+}
+
+export function relatedProducts(product: Product, count = 3) {
+  return products
+    .filter((item) => item.id !== product.id && item.category === product.category)
+    .concat(products.filter((item) => item.id !== product.id && item.category !== product.category))
+    .slice(0, count);
+}
+
+export type Rail = {
+  id: string;
+  title: string;
+  note: string;
+  productIds: number[];
+};
+
+export const homeRails: Rail[] = [
+  {
+    id: "mas-vendidos",
+    title: "Más vendidos",
+    note: "Lo que más eligen quienes ya construyen con nosotros.",
+    productIds: [4, 8, 13, 1, 5, 12],
+  },
+  {
+    id: "para-empezar",
+    title: "Para comenzar un proyecto",
+    note: "Kits y bases pensadas para arrancar sin sorpresas.",
+    productIds: [14, 15, 1, 7, 9],
+  },
+  {
+    id: "materiales",
+    title: "Materiales técnicos",
+    note: "Filamentos elegidos por cómo se comportan, no por color.",
+    productIds: [4, 5, 6],
+  },
+  {
+    id: "talleres",
+    title: "Selección para talleres",
+    note: "Repetibilidad, mantenimiento y medición fiable.",
+    productIds: [3, 2, 12, 13, 10],
+  },
+];
+
+export type AssistantReply = {
+  question: string;
+  title: string;
+  body: string;
+  checks: string[];
+  productIds: number[];
+  warning: string;
+};
+
+export const assistantReplies: AssistantReply[] = [
+  {
+    question: "Quiero imprimir un soporte para dejar el móvil dentro del coche en verano.",
+    title: "Evitaría PLA para este proyecto",
+    body: "Dentro de un coche al sol se pueden alcanzar temperaturas en las que el PLA empieza a deformarse. La opción más segura del catálogo es ASA, siempre que la impresora tenga cámara cerrada.",
+    checks: ["Uso expuesto a calor", "Pieza funcional", "Necesita resistencia UV"],
+    productIds: [6, 2, 13],
+    warning: "La Bambu Lab A1 no es la opción recomendada para ASA porque carece de cerramiento.",
+  },
+  {
+    question: "Quiero montar un sistema de riego que pueda consultar desde el móvil.",
+    title: "La ruta más directa es un kit ESP32",
+    body: "El kit integra placa, sensor, relé y bomba. Evita comprar componentes incompatibles por separado y permite empezar con una guía comprobada.",
+    checks: ["Conectividad WiFi", "Lectura de humedad", "Automatización de bomba"],
+    productIds: [14, 8, 12],
+    warning: "El kit está planteado para interior. Para exterior habría que añadir caja estanca y revisar la alimentación.",
+  },
+  {
+    question: "Necesito una impresora fiable para un pequeño taller de prototipado.",
+    title: "Priorizaría repetibilidad y mantenimiento",
+    body: "Para un taller importa más repetir piezas y resolver incidencias que ganar una carrera de velocidad. La MK4S ofrece una base reparable; la K1C interesa si se usarán materiales técnicos con frecuencia.",
+    checks: ["Uso frecuente", "Piezas funcionales", "Mantenimiento interno"],
+    productIds: [3, 2, 5],
+    warning: "La elección final depende del volumen semanal y de si se necesita imprimir ASA o materiales reforzados.",
+  },
+];
