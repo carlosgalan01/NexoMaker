@@ -10,15 +10,16 @@ import { useCart } from "@/lib/cart-context";
 type Turn = {
   id: number;
   question: string;
-  reply: AssistantReply;
+  reply: AssistantReply | null;
   reveal: number; // 0 thinking, 1 answer, 2 config, 3 warning
 };
 
-function matchScenario(text: string): AssistantReply {
+function matchScenario(text: string): AssistantReply | null {
   const value = text.toLowerCase();
   if (/(riego|agua|planta|humedad|wifi|conect)/.test(value)) return assistantReplies[1];
   if (/(taller|fiable|impresora|prototip|repetib)/.test(value)) return assistantReplies[2];
-  return assistantReplies[0];
+  if (/(coche|calor|m[oó]vil|soporte|asa|exterior)/.test(value)) return assistantReplies[0];
+  return null;
 }
 
 export function AssistExperience() {
@@ -87,7 +88,7 @@ export function AssistExperience() {
           )}
 
           {turns.map((turn) => {
-            const items = turn.reply.productIds.map(getProduct).filter(Boolean);
+            const items = turn.reply?.productIds.map(getProduct).filter(Boolean) ?? [];
             return (
               <div className="assist-turn" key={turn.id}>
                 <div className="user-bubble">{turn.question}</div>
@@ -98,7 +99,7 @@ export function AssistExperience() {
                     <span />
                     <span />
                   </div>
-                ) : (
+                ) : turn.reply ? (
                   <div className="assistant-bubble">
                     <div className="thinking-label">
                       <Sparkles size={15} /> Nexo Assist
@@ -151,6 +152,24 @@ export function AssistExperience() {
                         </div>
                       </div>
                     )}
+                  </div>
+                ) : (
+                  <div className="assistant-bubble">
+                    <div className="thinking-label">
+                      <CircleAlert size={15} /> Límite de la demostración
+                    </div>
+                    <h3>Todavía no puedo validar ese proyecto</h3>
+                    <p>
+                      Esta demo solo reconoce tres escenarios comprobados: una pieza expuesta al calor,
+                      un sistema de riego conectado y una impresora para un pequeño taller.
+                    </p>
+                    <div className="warning">
+                      <CircleAlert size={18} />
+                      <span>
+                        No se propone una configuración porque faltan reglas y datos de producto para
+                        responder con fiabilidad. Prueba uno de los ejemplos disponibles.
+                      </span>
+                    </div>
                   </div>
                 )}
               </div>
