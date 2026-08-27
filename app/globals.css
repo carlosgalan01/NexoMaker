@@ -170,7 +170,7 @@ main:has(.scrolly) ~ .floating-assist{display:none}
 .rail-item{width:260px}
 
 /* ---------- scrollytelling ---------- */
-.scrolly{max-width:1280px;margin:20px auto;padding:64px 24px 0}
+.scrolly{max-width:1280px;margin:20px auto;padding:0 24px}
 .scrolly-inner{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:start}
 .scrolly-steps{display:flex;flex-direction:column}
 .scrolly-intro{padding:20px 0 10px}
@@ -185,8 +185,8 @@ main:has(.scrolly) ~ .floating-assist{display:none}
 .scrolly-step h3{margin:0;font-family:"Space Grotesk";font-size:24px;letter-spacing:-.03em}
 .scrolly-step p{margin:0;max-width:440px;color:#54635b;line-height:1.6}
 .scrolly-cta{display:inline-flex;align-items:center;gap:8px;margin:24px 0 60px;color:var(--forest-2);font-weight:700}
-.scrolly-sticky{position:sticky;top:96px;height:min(560px,80vh);display:flex;align-items:center}
-.assist-panel{width:100%;overflow:hidden;border:1px solid var(--line);border-radius:18px;background:white;box-shadow:var(--shadow)}
+.scrolly-sticky{position:sticky;top:128px;height:calc(100vh - 152px);display:flex;align-items:flex-start}
+.assist-panel{width:100%;max-height:100%;overflow-y:auto;border:1px solid var(--line);border-radius:18px;background:white;box-shadow:var(--shadow)}
 .assist-panel-head{display:flex;align-items:center;gap:12px;padding:16px 18px;border-bottom:1px solid var(--line);background:var(--cream)}
 .assist-panel-head>span{display:grid;place-items:center;width:38px;height:38px;border-radius:11px;background:var(--lime);color:var(--forest)}
 .assist-panel-head strong{display:block;font-family:"Space Grotesk";font-size:15px}
@@ -195,8 +195,8 @@ main:has(.scrolly) ~ .floating-assist{display:none}
 .progress-dots i{width:7px;height:7px;border-radius:50%;background:var(--line);transition:.3s ease}
 .progress-dots i.on{background:var(--forest-2);transform:scale(1.2)}
 .assist-panel-body{padding:20px;min-height:360px;display:flex;flex-direction:column;gap:14px}
-.reveal-row{opacity:0;transform:translateY(10px);transition:.4s ease}
-.reveal-row.show{opacity:1;transform:none}
+.reveal-row{display:none;opacity:0;transform:translateY(10px);transition:.4s ease}
+.reveal-row.show{display:block;opacity:1;transform:none}
 .panel-tag{display:inline-flex;align-items:center;gap:6px;color:var(--forest-2);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
 .condition-chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}
 .condition-chips span{padding:6px 9px;border-radius:7px;background:#eef4f0;color:#3b5548;font-size:11px;font-weight:600}
