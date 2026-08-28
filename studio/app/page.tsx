@@ -15,6 +15,11 @@ export default function StudioPage() {
   const [style, setStyle] = useState("fotografia de producto");
   const [image, setImage] = useState("/campaign-demo.webp");
   const [gallery, setGallery] = useState<GalleryItem[]>([]);
+  const [product, setProduct] = useState("Impresora 3D cerrada");
+  const [objective, setObjective] = useState("Presentar el producto y llevar visitas a su ficha");
+  const [audience, setAudience] = useState("Pequenos talleres y makers que quieren utilizar materiales tecnicos");
+  const [channel, setChannel] = useState("Publicacion en redes sociales");
+  const [facts, setFacts] = useState("Camara cerrada y mayor control de temperatura. No incluir precios, certificaciones ni especificaciones que no aparezcan aqui.");
   const [text, setText] = useState(starterText);
   const [versions, setVersions] = useState<Version[]>([{ id: 1, text: starterText, action: "Original" }]);
   const [comment, setComment] = useState("");
@@ -41,7 +46,11 @@ export default function StudioPage() {
   async function editText(action: string) {
     if (!canGenerate) return;
     setLoading(true);
-    const response = await fetch("/api/text", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text, action, tone: "claro y profesional" }) });
+    const response = await fetch("/api/text", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text, action, product, objective, audience, channel, facts, tone: "claro y directo" }),
+    });
     const data = await response.json();
     setLoading(false);
     if (!response.ok) return setNotice(data.error || "No se pudo editar el texto.");
@@ -84,9 +93,23 @@ export default function StudioPage() {
           </>}
 
           {tab === "texto" && <>
-            <div className="section-title"><div><span>02 / EDICION DE COPY</span><h1>Editar sin perder el control del original</h1></div><Type /></div>
+            <div className="section-title"><div><span>02 / TEXTO DE CAMPANA</span><h1>Una idea adaptada al producto, al publico y al canal</h1></div><Type /></div>
+            <div className="briefing">
+              <div className="briefing-heading"><div><strong>Briefing</strong><small>La informacion que Haiku debe respetar</small></div><span>01</span></div>
+              <div className="field-row">
+                <label>Producto<input value={product} onChange={(event) => setProduct(event.target.value)} /></label>
+                <label>Objetivo<input value={objective} onChange={(event) => setObjective(event.target.value)} /></label>
+              </div>
+              <div className="field-row">
+                <label>Publico<input value={audience} onChange={(event) => setAudience(event.target.value)} /></label>
+                <label>Canal<select value={channel} onChange={(event) => setChannel(event.target.value)}><option>Publicacion en redes sociales</option><option>Correo comercial</option><option>Banner de la tienda</option><option>Ficha de producto</option></select></label>
+              </div>
+              <label>Datos que se pueden utilizar<textarea className="facts" value={facts} onChange={(event) => setFacts(event.target.value)} /></label>
+            </div>
+            <div className="copy-heading"><div><strong>Propuesta de texto</strong><small>Puede partir de un borrador o crearse desde el briefing</small></div><span>02</span></div>
             <label>Texto de campana<textarea className="editor" value={text} onChange={(event) => setText(event.target.value)} /></label>
-            <div className="actions">{["resumir", "ampliar", "corregir", "variar"].map((action) => <button key={action} onClick={() => editText(action)} disabled={loading || !canGenerate}>{action}</button>)}</div>
+            <button className="primary create-copy" onClick={() => editText("crear")} disabled={loading || !canGenerate}><Sparkles size={18} /> {loading ? "Preparando..." : "Crear propuesta desde el briefing"}</button>
+            <div className="actions">{["adaptar", "resumir", "ampliar", "corregir", "variar"].map((action) => <button key={action} onClick={() => editText(action)} disabled={loading || !canGenerate}>{action === "adaptar" ? "adaptar al canal" : action}</button>)}</div>
             <p className="notice">{notice}</p>
             <div className="history"><h2><History size={17} /> Historial</h2>{versions.slice().reverse().map((version, index) => <button key={version.id} onClick={() => setText(version.text)}><strong>v{versions.length - index}</strong><span>{version.action}</span><small>{version.text.slice(0, 76)}...</small></button>)}</div>
           </>}
