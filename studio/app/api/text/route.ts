@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { signedBedrockFetch } from "../../../lib/bedrock";
 
 const instructions: Record<string, string> = {
-  crear: "Crea una primera propuesta de texto a partir del briefing. No anadas ningun dato que no aparezca en la informacion permitida.",
+  crear: "Crea una primera propuesta de texto a partir del briefing. Puedes anadir una llamada a la accion neutra, pero todas las afirmaciones sobre el producto deben aparecer literalmente en la informacion permitida.",
   adaptar: "Adapta el texto al canal indicado. Conserva los hechos y cambia solo la estructura, la longitud y la llamada a la accion cuando sea necesario.",
   resumir: "Resume el texto conservando el mensaje comercial y los datos verificables.",
   ampliar: "Amplia el texto con informacion util, sin inventar especificaciones ni promesas.",
@@ -26,7 +26,7 @@ export async function POST(request: Request) {
   const region = process.env.AWS_REGION || "eu-west-3";
   const modelId = process.env.BEDROCK_TEXT_MODEL_ID || "eu.anthropic.claude-haiku-4-5-20251001-v1:0";
   const body = JSON.stringify({
-    system: [{ text: "Eres el editor de NexoMaker Studio. Preparas textos comerciales claros y utiles a partir de un briefing. No inventes datos tecnicos, precios, certificaciones ni afirmaciones no proporcionadas. Si faltan datos, evita la afirmacion. Devuelve solo el texto final, sin explicar el proceso." }],
+    system: [{ text: "Eres el editor de NexoMaker Studio. Preparas textos comerciales claros y utiles a partir de un briefing. La seccion Informacion permitida es tu unica fuente de hechos sobre el producto. No deduzcas beneficios, resultados, problemas del cliente ni mejoras de rendimiento a partir de sus caracteristicas. Por ejemplo, una camara cerrada no permite afirmar por tu cuenta que habra mas precision, menos fallos o mejores piezas. No inventes datos tecnicos, precios, certificaciones ni promesas. Puedes cambiar el orden, el tono y la longitud, y puedes cerrar con una llamada a consultar la ficha. Si un dato no aparece, omitelo. Devuelve solo el texto final, sin explicar el proceso." }],
     messages: [{ role: "user", content: [{ text: `${instructions[action]}\n\nProducto: ${product}\nObjetivo: ${objective}\nPublico: ${audience}\nCanal: ${channel}\nTono: ${tone}\nInformacion permitida: ${facts}\n\nTexto actual:\n${text || "No existe todavia."}` }] }],
     inferenceConfig: { maxTokens: 700, temperature: 0.4 },
   });
