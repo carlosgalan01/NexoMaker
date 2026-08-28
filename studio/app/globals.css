@@ -31,6 +31,8 @@ textarea { min-height:100px; resize:vertical; line-height:1.45; }
 .briefing-heading>span, .copy-heading>span { display:grid; place-items:center; width:28px; height:28px; border-radius:50%; color:#fff; background:var(--ink); font-size:11px; font-weight:800; }
 .briefing .field-row { margin:0 0 14px; }
 .facts { min-height:76px; }
+.briefing>label+label { margin-top:14px; }
+.facts-label small { color:var(--muted); font-weight:400; }
 .copy-heading { margin-top:4px; }
 .create-copy { margin-top:14px; }
 .field-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin:16px 0; }
@@ -45,6 +47,12 @@ button:disabled { opacity:.48; cursor:not-allowed; }
 .actions button:hover { border-color:var(--ink); }
 .notice, .warning { color:var(--muted); font-size:12px; }
 .warning { color:#9b3a16; }
+.prompt-explainer { margin:22px 0 0; border:1px solid var(--line); background:#fafafa; }
+.prompt-explainer summary { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:14px 16px; cursor:pointer; font-size:13px; font-weight:800; }
+.prompt-explainer summary span { color:var(--muted); font-size:11px; font-weight:400; }
+.prompt-explainer>div { padding:0 16px 16px; border-top:1px solid var(--line); }
+.prompt-explainer p { color:var(--muted); font-size:12px; line-height:1.5; }
+.prompt-explainer pre { overflow:auto; margin:12px 0 0; padding:16px; border-radius:6px; color:#eaf0ff; background:#111827; font:12px/1.55 "SFMono-Regular", Consolas, monospace; white-space:pre-wrap; }
 .history { margin-top:28px; border-top:1px solid var(--line); padding-top:15px; }
 .history>button { display:grid; grid-template-columns:38px 78px 1fr; gap:10px; width:100%; text-align:left; border:0; border-bottom:1px solid var(--line); padding:12px 5px; background:#fff; }
 .history small { color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }

@@ -11,7 +11,9 @@ La generacion no decide que se publica. Disenadores y redactores preparan borrad
 ## Estado real
 
 - La version desplegada en Vercel utiliza Amazon Bedrock de forma real.
-- Claude Haiku 4.5 crea y adapta el texto a partir del producto, el objetivo, el publico y el canal. Tambien resume, amplia, corrige y genera variaciones.
+- Claude Haiku 4.5 crea y adapta el texto a partir del producto, el objetivo, el publico, el canal, el enfoque, el tono y la llamada a la accion. Las afirmaciones sobre el producto se limitan a la informacion comprobada del briefing.
+- Una segunda llamada revisa el borrador y elimina afirmaciones no respaldadas sin borrar su estructura comercial.
+- La pestana de texto incluye una version educativa de las instrucciones. Se muestra para explicar el prototipo; en una herramienta real el prompt permaneceria en el servidor.
 - El mismo modelo traduce y concreta las peticiones visuales antes de enviarlas al modelo de imagen.
 - Stable Image Core genera las imagenes a partir del prompt refinado.
 - Sin credenciales, la aplicacion conserva un modo demostracion y lo indica en pantalla.

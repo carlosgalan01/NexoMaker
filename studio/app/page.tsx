@@ -6,7 +6,7 @@ import { Download, History, ImagePlus, MessageSquare, Send, ShieldCheck, Sparkle
 type Version = { id: number; text: string; action: string };
 type GalleryItem = { id: number; src: string; prompt: string; demo: boolean };
 
-const starterText = "Presentamos una impresora 3D cerrada para crear piezas resistentes con mayor control de temperatura. Una opcion pensada para talleres y makers que quieren avanzar a materiales tecnicos.";
+const starterText = "Más control cuando el proyecto lo necesita.\n\nLa cámara cerrada permite mantener un mayor control de temperatura durante la impresión. Una propuesta para pequeños talleres y makers que trabajan con materiales técnicos.\n\nConsulta la ficha y comprueba si encaja en tu próximo proyecto.";
 
 export default function StudioPage() {
   const [tab, setTab] = useState<"visual" | "texto" | "galeria">("visual");
@@ -18,8 +18,11 @@ export default function StudioPage() {
   const [product, setProduct] = useState("Impresora 3D cerrada");
   const [objective, setObjective] = useState("Presentar el producto y llevar visitas a su ficha");
   const [audience, setAudience] = useState("Pequenos talleres y makers que quieren utilizar materiales tecnicos");
-  const [channel, setChannel] = useState("Publicacion en redes sociales");
-  const [facts, setFacts] = useState("Camara cerrada y mayor control de temperatura. No incluir precios, certificaciones ni especificaciones que no aparezcan aqui.");
+  const [channel, setChannel] = useState("Publicación en redes sociales");
+  const [angle, setAngle] = useState("Mas control para proyectos con materiales tecnicos");
+  const [cta, setCta] = useState("Consulta la ficha y comprueba si encaja en tu proximo proyecto");
+  const [tone, setTone] = useState("claro y cercano");
+  const [facts, setFacts] = useState("La camara cerrada permite mantener un mayor control de temperatura durante la impresion.");
   const [text, setText] = useState(starterText);
   const [versions, setVersions] = useState<Version[]>([{ id: 1, text: starterText, action: "Original" }]);
   const [comment, setComment] = useState("");
@@ -49,14 +52,14 @@ export default function StudioPage() {
     const response = await fetch("/api/text", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text, action, product, objective, audience, channel, facts, tone: "claro y directo" }),
+      body: JSON.stringify({ text, action, product, objective, audience, channel, angle, cta, facts, tone }),
     });
     const data = await response.json();
     setLoading(false);
     if (!response.ok) return setNotice(data.error || "No se pudo editar el texto.");
     setText(data.output);
     setVersions((items) => [...items, { id: Date.now(), text: data.output, action }]);
-    setNotice(data.demo ? "Edicion simulada. Bedrock aun no esta configurado." : "Texto editado con Claude en Amazon Bedrock.");
+    setNotice(data.demo ? "Edicion simulada. Bedrock aun no esta configurado." : data.verified ? "Texto creado y comprobado con Claude Haiku en Amazon Bedrock." : "Texto editado con Claude en Amazon Bedrock.");
   }
 
   function addComment() {
@@ -93,24 +96,36 @@ export default function StudioPage() {
           </>}
 
           {tab === "texto" && <>
-            <div className="section-title"><div><span>02 / TEXTO DE CAMPANA</span><h1>Una idea adaptada al producto, al publico y al canal</h1></div><Type /></div>
+            <div className="section-title"><div><span>02 / TEXTO DE CAMPAÑA</span><h1>Del briefing a un texto listo para revisar</h1></div><Type /></div>
             <div className="briefing">
-              <div className="briefing-heading"><div><strong>Briefing</strong><small>La informacion que Haiku debe respetar</small></div><span>01</span></div>
+              <div className="briefing-heading"><div><strong>Briefing de campaña</strong><small>Define la intención; los hechos comprobados limitan lo que Haiku puede afirmar</small></div><span>01</span></div>
               <div className="field-row">
                 <label>Producto<input value={product} onChange={(event) => setProduct(event.target.value)} /></label>
                 <label>Objetivo<input value={objective} onChange={(event) => setObjective(event.target.value)} /></label>
               </div>
               <div className="field-row">
-                <label>Publico<input value={audience} onChange={(event) => setAudience(event.target.value)} /></label>
-                <label>Canal<select value={channel} onChange={(event) => setChannel(event.target.value)}><option>Publicacion en redes sociales</option><option>Correo comercial</option><option>Banner de la tienda</option><option>Ficha de producto</option></select></label>
+                <label>Público<input value={audience} onChange={(event) => setAudience(event.target.value)} /></label>
+                <label>Canal<select value={channel} onChange={(event) => setChannel(event.target.value)}><option>Publicación en redes sociales</option><option>Correo comercial</option><option>Banner de la tienda</option><option>Ficha de producto</option></select></label>
               </div>
-              <label>Datos que se pueden utilizar<textarea className="facts" value={facts} onChange={(event) => setFacts(event.target.value)} /></label>
+              <div className="field-row">
+                <label>Enfoque de la campaña<input value={angle} onChange={(event) => setAngle(event.target.value)} /></label>
+                <label>Tono<select value={tone} onChange={(event) => setTone(event.target.value)}><option>claro y cercano</option><option>técnico y preciso</option><option>breve y directo</option><option>inspirador sin exagerar</option></select></label>
+              </div>
+              <label>Llamada a la acción<input value={cta} onChange={(event) => setCta(event.target.value)} /></label>
+              <label className="facts-label">Información comprobada<textarea className="facts" value={facts} onChange={(event) => setFacts(event.target.value)} /><small>Es la única fuente para especificaciones, ventajas o resultados del producto.</small></label>
             </div>
             <div className="copy-heading"><div><strong>Propuesta de texto</strong><small>Puede partir de un borrador o crearse desde el briefing</small></div><span>02</span></div>
             <label>Texto de campana<textarea className="editor" value={text} onChange={(event) => setText(event.target.value)} /></label>
             <button className="primary create-copy" onClick={() => editText("crear")} disabled={loading || !canGenerate}><Sparkles size={18} /> {loading ? "Preparando..." : "Crear propuesta desde el briefing"}</button>
             <div className="actions">{["adaptar", "resumir", "ampliar", "corregir", "variar"].map((action) => <button key={action} onClick={() => editText(action)} disabled={loading || !canGenerate}>{action === "adaptar" ? "adaptar al canal" : action}</button>)}</div>
             <p className="notice">{notice}</p>
+            <details className="prompt-explainer">
+              <summary>Ver las instrucciones que recibe Haiku <span>Solo para explicar el prototipo</span></summary>
+              <div>
+                <p>En una herramienta real estas instrucciones se ejecutarían en el servidor y no se mostrarían al usuario. Aquí se incluyen para poder entender y evaluar el comportamiento del modelo.</p>
+                <pre>{`TAREA\nConvierte el briefing en una pieza de campaña útil para ${channel}.\n\nBRIEFING\nProducto: ${product}\nObjetivo: ${objective}\nPúblico: ${audience}\nEnfoque: ${angle}\nTono: ${tone}\nLlamada a la acción: ${cta}\nInformación comprobada: ${facts}\n\nREGLAS\n- Empieza con una frase que llame la atención.\n- Desarrolla una sola idea y termina con la llamada a la acción.\n- Adapta la longitud y la estructura al canal.\n- No inventes ventajas, precios, certificaciones ni datos técnicos.\n- Devuelve únicamente el texto final, sin títulos ni Markdown.`}</pre>
+              </div>
+            </details>
             <div className="history"><h2><History size={17} /> Historial</h2>{versions.slice().reverse().map((version, index) => <button key={version.id} onClick={() => setText(version.text)}><strong>v{versions.length - index}</strong><span>{version.action}</span><small>{version.text.slice(0, 76)}...</small></button>)}</div>
           </>}
 
