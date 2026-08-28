@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { signedBedrockFetch } from "../../../lib/bedrock";
 
 const instructions: Record<string, string> = {
   resumir: "Resume el texto conservando el mensaje comercial y los datos verificables.",
@@ -13,33 +14,40 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Faltan el texto o la accion." }, { status: 400 });
   }
 
-  const token = process.env.AWS_BEARER_TOKEN_BEDROCK;
-  if (!token) {
+  if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY) {
     return NextResponse.json({ demo: true, output: demoEdit(text, action) });
   }
 
-  const region = process.env.BEDROCK_TEXT_REGION || "eu-west-1";
+  const region = process.env.AWS_REGION || "eu-west-3";
   const modelId = process.env.BEDROCK_TEXT_MODEL_ID || "eu.anthropic.claude-haiku-4-5-20251001-v1:0";
-  const response = await fetch(
-    `https://bedrock-runtime.${region}.amazonaws.com/model/${encodeURIComponent(modelId)}/converse`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-      body: JSON.stringify({
-        system: [{ text: "Eres el editor de NexoMaker. No inventes datos tecnicos, precios ni certificaciones. Devuelve solo el texto final." }],
-        messages: [{ role: "user", content: [{ text: `${instructions[action]} Tono: ${tone}.\n\n${text}` }] }],
-        inferenceConfig: { maxTokens: 700, temperature: 0.4 },
-      }),
-    },
-  );
+  const body = JSON.stringify({
+    system: [{ text: "Eres el editor de NexoMaker Studio. Ayudas a crear contenido comercial claro y util. No inventes datos tecnicos, precios, certificaciones ni afirmaciones no proporcionadas. Devuelve solo el texto final." }],
+    messages: [{ role: "user", content: [{ text: `${instructions[action]} Tono: ${tone}.\n\n${text}` }] }],
+    inferenceConfig: { maxTokens: 700, temperature: 0.4 },
+  });
 
-  if (!response.ok) {
-    const detail = await response.text();
-    return NextResponse.json({ error: "Bedrock no pudo editar el texto.", detail }, { status: response.status });
+  try {
+    const response = await signedBedrockFetch(
+      `https://bedrock-runtime.${region}.amazonaws.com/model/${encodeURIComponent(modelId)}/converse`,
+      body,
+      region,
+    );
+
+    if (!response.ok) {
+      const detail = await response.text();
+      console.error("Bedrock text error", response.status, detail);
+      return NextResponse.json({ error: "Bedrock no pudo editar el texto.", detail }, { status: response.status });
+    }
+
+    const data = await response.json();
+    return NextResponse.json({ demo: false, output: data.output?.message?.content?.[0]?.text || "" });
+  } catch (error) {
+    console.error("Bedrock connection error", error);
+    return NextResponse.json(
+      { error: "No se pudo conectar con Amazon Bedrock.", detail: error instanceof Error ? error.message : "Error desconocido" },
+      { status: 500 },
+    );
   }
-
-  const data = await response.json();
-  return NextResponse.json({ demo: false, output: data.output?.message?.content?.[0]?.text || "" });
 }
 
 function demoEdit(text: string, action: string) {
