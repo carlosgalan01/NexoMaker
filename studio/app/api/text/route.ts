@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { signedBedrockFetch } from "../../../lib/bedrock";
 
 const instructions: Record<string, string> = {
+  crear: "Crea una primera propuesta de texto a partir del briefing. No anadas ningun dato que no aparezca en la informacion permitida.",
+  adaptar: "Adapta el texto al canal indicado. Conserva los hechos y cambia solo la estructura, la longitud y la llamada a la accion cuando sea necesario.",
   resumir: "Resume el texto conservando el mensaje comercial y los datos verificables.",
   ampliar: "Amplia el texto con informacion util, sin inventar especificaciones ni promesas.",
   corregir: "Corrige gramatica y estilo. Hazlo claro, directo y profesional.",
@@ -9,9 +11,12 @@ const instructions: Record<string, string> = {
 };
 
 export async function POST(request: Request) {
-  const { text, action, tone = "directo" } = await request.json();
-  if (!text?.trim() || !instructions[action]) {
+  const { text = "", action, tone = "directo", product = "", objective = "", audience = "", channel = "", facts = "" } = await request.json();
+  if (!instructions[action] || (action !== "crear" && !text?.trim())) {
     return NextResponse.json({ error: "Faltan el texto o la accion." }, { status: 400 });
+  }
+  if (action === "crear" && (!product.trim() || !objective.trim() || !audience.trim() || !facts.trim())) {
+    return NextResponse.json({ error: "Completa el briefing antes de crear la propuesta." }, { status: 400 });
   }
 
   if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY) {
@@ -21,8 +26,8 @@ export async function POST(request: Request) {
   const region = process.env.AWS_REGION || "eu-west-3";
   const modelId = process.env.BEDROCK_TEXT_MODEL_ID || "eu.anthropic.claude-haiku-4-5-20251001-v1:0";
   const body = JSON.stringify({
-    system: [{ text: "Eres el editor de NexoMaker Studio. Ayudas a crear contenido comercial claro y util. No inventes datos tecnicos, precios, certificaciones ni afirmaciones no proporcionadas. Devuelve solo el texto final." }],
-    messages: [{ role: "user", content: [{ text: `${instructions[action]} Tono: ${tone}.\n\n${text}` }] }],
+    system: [{ text: "Eres el editor de NexoMaker Studio. Preparas textos comerciales claros y utiles a partir de un briefing. No inventes datos tecnicos, precios, certificaciones ni afirmaciones no proporcionadas. Si faltan datos, evita la afirmacion. Devuelve solo el texto final, sin explicar el proceso." }],
+    messages: [{ role: "user", content: [{ text: `${instructions[action]}\n\nProducto: ${product}\nObjetivo: ${objective}\nPublico: ${audience}\nCanal: ${channel}\nTono: ${tone}\nInformacion permitida: ${facts}\n\nTexto actual:\n${text || "No existe todavia."}` }] }],
     inferenceConfig: { maxTokens: 700, temperature: 0.4 },
   });
 
@@ -52,6 +57,8 @@ export async function POST(request: Request) {
 
 function demoEdit(text: string, action: string) {
   const clean = text.trim().replace(/\s+/g, " ");
+  if (action === "crear") return "Descubre una impresora 3D cerrada pensada para talleres y makers que quieren trabajar con materiales tecnicos y mantener un mayor control de la temperatura. Consulta la ficha del producto antes de elegir tu configuracion.";
+  if (action === "adaptar") return `${clean}\n\nConsulta la ficha del producto para conocer todos los detalles.`;
   if (action === "resumir") return `${clean.slice(0, 180)}${clean.length > 180 ? "..." : ""}`;
   if (action === "ampliar") return `${clean}\n\nLa propuesta se completa con una imagen centrada en el producto, una llamada a la accion clara y especificaciones revisadas antes de publicar.`;
   if (action === "corregir") return clean.charAt(0).toUpperCase() + clean.slice(1).replace(/!+/g, ".");
