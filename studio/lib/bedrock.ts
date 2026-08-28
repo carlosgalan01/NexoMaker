@@ -15,6 +15,13 @@ function signingKey(secretAccessKey: string, date: string, region: string, servi
   return hmac(kService, "aws4_request");
 }
 
+function canonicalUri(pathname: string) {
+  return pathname
+    .split("/")
+    .map((segment) => encodeURIComponent(segment))
+    .join("/");
+}
+
 export async function signedBedrockFetch(
   urlString: string,
   body: string,
@@ -56,7 +63,7 @@ export async function signedBedrockFetch(
 
   const canonicalRequest = [
     "POST",
-    url.pathname,
+    canonicalUri(url.pathname),
     canonicalQueryString,
     canonicalHeaders,
     signedHeaders,
