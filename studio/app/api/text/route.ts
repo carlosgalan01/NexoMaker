@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { signedBedrockFetch } from "../../../lib/bedrock";
 
 const instructions: Record<string, string> = {
-  crear: "Crea una primera propuesta de texto a partir del briefing. Puedes anadir una llamada a la accion neutra, pero todas las afirmaciones sobre el producto deben aparecer literalmente en la informacion permitida.",
+  crear: "Crea una primera propuesta completa a partir del briefing. No resumas los campos ni los presentes como una lista: conviertelos en una pieza de campana con una entrada atractiva, un desarrollo breve y una llamada a la accion.",
   adaptar: "Adapta el texto al canal indicado. Conserva los hechos y cambia solo la estructura, la longitud y la llamada a la accion cuando sea necesario.",
   resumir: "Resume el texto conservando el mensaje comercial y los datos verificables.",
   ampliar: "Amplia el texto con informacion util, sin inventar especificaciones ni promesas.",
@@ -11,23 +11,23 @@ const instructions: Record<string, string> = {
 };
 
 export async function POST(request: Request) {
-  const { text = "", action, tone = "directo", product = "", objective = "", audience = "", channel = "", facts = "" } = await request.json();
+  const { text = "", action, tone = "directo", product = "", objective = "", audience = "", channel = "", angle = "", cta = "", facts = "" } = await request.json();
   if (!instructions[action] || (action !== "crear" && !text?.trim())) {
     return NextResponse.json({ error: "Faltan el texto o la accion." }, { status: 400 });
   }
-  if (action === "crear" && (!product.trim() || !objective.trim() || !audience.trim() || !facts.trim())) {
+  if (action === "crear" && (!product.trim() || !objective.trim() || !audience.trim() || !angle.trim() || !cta.trim() || !facts.trim())) {
     return NextResponse.json({ error: "Completa el briefing antes de crear la propuesta." }, { status: 400 });
   }
 
   if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY) {
-    return NextResponse.json({ demo: true, output: demoEdit(text, action) });
+    return NextResponse.json({ demo: true, output: demoEdit(text, action, product, audience, facts, cta) });
   }
 
   const region = process.env.AWS_REGION || "eu-west-3";
   const modelId = process.env.BEDROCK_TEXT_MODEL_ID || "eu.anthropic.claude-haiku-4-5-20251001-v1:0";
   const body = JSON.stringify({
-    system: [{ text: "Eres el editor de NexoMaker Studio. Preparas textos comerciales claros y utiles a partir de un briefing. La seccion Informacion permitida es tu unica fuente de hechos sobre el producto. No deduzcas beneficios, resultados, problemas del cliente ni mejoras de rendimiento a partir de sus caracteristicas. Por ejemplo, una camara cerrada no permite afirmar por tu cuenta que habra mas precision, menos fallos o mejores piezas. No inventes datos tecnicos, precios, certificaciones ni promesas. Puedes cambiar el orden, el tono y la longitud, y puedes cerrar con una llamada a consultar la ficha. Si un dato no aparece, omitelo. Devuelve solo el texto final, sin explicar el proceso." }],
-    messages: [{ role: "user", content: [{ text: `${instructions[action]}\n\nProducto: ${product}\nObjetivo: ${objective}\nPublico: ${audience}\nCanal: ${channel}\nTono: ${tone}\nInformacion permitida: ${facts}\n\nTexto actual:\n${text || "No existe todavia."}` }] }],
+    system: [{ text: "Eres el redactor de NexoMaker Studio. Tu trabajo no es repetir un briefing, sino convertirlo en una pieza de campana util. Adapta la estructura y la longitud al canal. Empieza con una frase que despierte interes, desarrolla una sola idea y termina con la llamada a la accion indicada. No uses titulos, etiquetas, Markdown ni asteriscos. La Informacion comprobada es tu unica fuente de afirmaciones sobre el producto: no deduzcas beneficios, resultados o mejoras que no aparezcan ahi. El enfoque orienta la narracion, pero no sirve como evidencia factual. No inventes precios, certificaciones, especificaciones ni promesas. Devuelve solo el texto final." }],
+    messages: [{ role: "user", content: [{ text: `${instructions[action]}\n\nProducto: ${product}\nObjetivo: ${objective}\nPublico: ${audience}\nCanal: ${channel}\nEnfoque: ${angle}\nTono: ${tone}\nLlamada a la accion: ${cta}\nInformacion comprobada: ${facts}\n\nTexto actual:\n${text || "No existe todavia."}` }] }],
     inferenceConfig: { maxTokens: 700, temperature: 0.4 },
   });
 
@@ -49,8 +49,8 @@ export async function POST(request: Request) {
     if (!draft) return NextResponse.json({ error: "Haiku no devolvio ningun texto." }, { status: 502 });
 
     const verificationBody = JSON.stringify({
-      system: [{ text: "Revisas textos de NexoMaker Studio antes de mostrarlos. La Informacion permitida es la unica fuente de afirmaciones sobre el producto. Reescribe el borrador y elimina cualquier beneficio, resultado, problema del cliente, caracteristica o promesa que no este respaldada de forma directa por esa informacion. El publico, el objetivo y el canal solo sirven para adaptar el tono y la longitud, no para inventar hechos. Puedes conservar una llamada neutra a consultar la ficha. Devuelve solo el texto corregido." }],
-      messages: [{ role: "user", content: [{ text: `Informacion permitida:\n${facts}\n\nBorrador que debes comprobar:\n${draft}` }] }],
+      system: [{ text: "Revisas un texto de campana antes de mostrarlo. Conserva su entrada, su tono, su estructura y su llamada a la accion. Elimina o reformula unicamente las afirmaciones sobre el producto que no esten respaldadas de forma directa por la Informacion comprobada. No conviertas el texto en una lista de datos ni lo reduzcas a un resumen. No uses Markdown. Devuelve solo el texto corregido." }],
+      messages: [{ role: "user", content: [{ text: `Producto: ${product}\nObjetivo: ${objective}\nPublico: ${audience}\nCanal: ${channel}\nEnfoque: ${angle}\nTono: ${tone}\nLlamada a la accion: ${cta}\nInformacion comprobada:\n${facts}\n\nBorrador que debes comprobar:\n${draft}` }] }],
       inferenceConfig: { maxTokens: 700, temperature: 0 },
     });
     const verification = await signedBedrockFetch(
@@ -76,9 +76,9 @@ export async function POST(request: Request) {
   }
 }
 
-function demoEdit(text: string, action: string) {
+function demoEdit(text: string, action: string, product: string, audience: string, facts: string, cta: string) {
   const clean = text.trim().replace(/\s+/g, " ");
-  if (action === "crear") return "Descubre una impresora 3D cerrada pensada para talleres y makers que quieren trabajar con materiales tecnicos y mantener un mayor control de la temperatura. Consulta la ficha del producto antes de elegir tu configuracion.";
+  if (action === "crear") return `${product.trim()}: mas control cuando el proyecto lo necesita.\n\n${facts.trim()} Una propuesta dirigida a ${audience.toLowerCase()}.\n\n${cta.trim()}.`;
   if (action === "adaptar") return `${clean}\n\nConsulta la ficha del producto para conocer todos los detalles.`;
   if (action === "resumir") return `${clean.slice(0, 180)}${clean.length > 180 ? "..." : ""}`;
   if (action === "ampliar") return `${clean}\n\nLa propuesta se completa con una imagen centrada en el producto, una llamada a la accion clara y especificaciones revisadas antes de publicar.`;
