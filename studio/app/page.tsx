@@ -20,7 +20,7 @@ export default function StudioPage() {
   const [comment, setComment] = useState("");
   const [comments, setComments] = useState<string[]>(["Aprobacion: comprobar la temperatura maxima antes de publicar."]);
   const [loading, setLoading] = useState(false);
-  const [notice, setNotice] = useState("Modo demostracion: la conexion real se activa al configurar Bedrock.");
+  const [notice, setNotice] = useState("El resultado indicara si procede de Amazon Bedrock o del modo demostracion.");
 
   const canGenerate = role !== "Aprobador";
   const canApprove = role === "Aprobador";

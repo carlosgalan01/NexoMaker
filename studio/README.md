@@ -10,18 +10,20 @@ La generacion no decide que se publica. Disenadores y redactores preparan borrad
 
 ## Estado real
 
-- Sin credenciales, funciona en modo demostracion y lo indica en pantalla.
-- Con una clave de Amazon Bedrock, las rutas del servidor llaman a Stability AI y Claude. Cada modelo utiliza su region disponible.
+- La version desplegada en Vercel utiliza Amazon Bedrock de forma real.
+- Claude Haiku 4.5 edita los textos y tambien traduce y concreta las peticiones visuales antes de enviarlas al modelo de imagen.
+- Stable Image Core genera las imagenes a partir del prompt refinado.
+- Sin credenciales, la aplicacion conserva un modo demostracion y lo indica en pantalla.
 - Los roles y comentarios se guardan solo durante la sesion. Una version de produccion necesitaria autenticacion y base de datos.
 - La demo no esta conectada al catalogo ni al gestor de contenidos de NexoMaker. Esa integracion se describe como siguiente fase y no se presenta como terminada.
 
 ## Ejecutar
 
 1. Instalar dependencias: `npm install` (o abrir la carpeta en VS Code y aceptar la instalacion sugerida).
-2. Duplicar `.env.example` como `.env.local` desde el Explorador de VS Code y anadir la clave de Bedrock.
+2. Duplicar `.env.example` como `.env.local` desde el Explorador de VS Code y anadir las credenciales de AWS.
 3. Ejecutar `npm run dev` (o usar el boton Run and Debug de VS Code).
 4. Abrir `http://localhost:3000`.
 
 ## Variables
 
-No se debe subir `.env.local` a GitHub. Para Vercel, se configuran en Project Settings > Environment Variables.
+No se debe subir `.env.local` a GitHub. En Vercel, las credenciales se guardan en Project Settings > Environment Variables y solo las utilizan las rutas del servidor.
