@@ -1,6 +1,6 @@
 # NexoMaker Studio
 
-MVP academico para el caso practico de la Unidad 3 de Generative AI. Permite demostrar un flujo de creacion de campanas con imagen, edicion de texto, historial, roles y comentarios.
+MVP academico para el caso practico de la Unidad 3 de Generative AI. Permite preparar una campana desde un briefing, generar su imagen, crear o adaptar el texto, conservar versiones y dejar comentarios antes de publicar.
 
 ## Relacion con NexoMaker
 
@@ -11,7 +11,8 @@ La generacion no decide que se publica. Disenadores y redactores preparan borrad
 ## Estado real
 
 - La version desplegada en Vercel utiliza Amazon Bedrock de forma real.
-- Claude Haiku 4.5 edita los textos y tambien traduce y concreta las peticiones visuales antes de enviarlas al modelo de imagen.
+- Claude Haiku 4.5 crea y adapta el texto a partir del producto, el objetivo, el publico y el canal. Tambien resume, amplia, corrige y genera variaciones.
+- El mismo modelo traduce y concreta las peticiones visuales antes de enviarlas al modelo de imagen.
 - Stable Image Core genera las imagenes a partir del prompt refinado.
 - Sin credenciales, la aplicacion conserva un modo demostracion y lo indica en pantalla.
 - Los roles y comentarios se guardan solo durante la sesion. Una version de produccion necesitaria autenticacion y base de datos.
