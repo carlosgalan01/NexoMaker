@@ -45,7 +45,28 @@ export async function POST(request: Request) {
     }
 
     const data = await response.json();
-    return NextResponse.json({ demo: false, output: data.output?.message?.content?.[0]?.text || "" });
+    const draft = data.output?.message?.content?.[0]?.text?.trim();
+    if (!draft) return NextResponse.json({ error: "Haiku no devolvio ningun texto." }, { status: 502 });
+
+    const verificationBody = JSON.stringify({
+      system: [{ text: "Revisas textos de NexoMaker Studio antes de mostrarlos. La Informacion permitida es la unica fuente de afirmaciones sobre el producto. Reescribe el borrador y elimina cualquier beneficio, resultado, problema del cliente, caracteristica o promesa que no este respaldada de forma directa por esa informacion. El publico, el objetivo y el canal solo sirven para adaptar el tono y la longitud, no para inventar hechos. Puedes conservar una llamada neutra a consultar la ficha. Devuelve solo el texto corregido." }],
+      messages: [{ role: "user", content: [{ text: `Informacion permitida:\n${facts}\n\nBorrador que debes comprobar:\n${draft}` }] }],
+      inferenceConfig: { maxTokens: 700, temperature: 0 },
+    });
+    const verification = await signedBedrockFetch(
+      `https://bedrock-runtime.${region}.amazonaws.com/model/${encodeURIComponent(modelId)}/converse`,
+      verificationBody,
+      region,
+    );
+    if (!verification.ok) {
+      const detail = await verification.text();
+      console.error("Bedrock text verification error", verification.status, detail);
+      return NextResponse.json({ error: "No se pudo comprobar el texto generado." }, { status: verification.status });
+    }
+    const checkedData = await verification.json();
+    const output = checkedData.output?.message?.content?.[0]?.text?.trim();
+    if (!output) return NextResponse.json({ error: "Haiku no devolvio el texto comprobado." }, { status: 502 });
+    return NextResponse.json({ demo: false, verified: true, output });
   } catch (error) {
     console.error("Bedrock connection error", error);
     return NextResponse.json(
